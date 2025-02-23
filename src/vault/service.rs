@@ -1,0 +1,92 @@
+use anchor_client::{
+    solana_sdk::signature::Keypair,
+    Program
+};
+use anchor_lang::prelude::Pubkey;
+use anchor_spl::token::Mint;
+use std::rc::Rc;
+
+use crate::memepool;
+use super::{
+    utils::{VAULT_PDA, MEME_TOKEN_PDA},
+    instructions::fill_withdraw_request,
+};
+
+pub async fn process_withdraw_request(
+    program: &Program<Rc<Keypair>>,
+    spl_program: &Program<Rc<Keypair>>,
+    aggregator_keypair: &Keypair,
+    request_pubkey: Pubkey,
+    withdraw_request: memepool::accounts::WithdrawRequest,
+) -> Result<(), String> {
+    // Get the vault account
+    let vault_address = *VAULT_PDA;
+    let vault = program.account::<memepool::accounts::Vault>(vault_address)
+        .await
+        .map_err(|e| format!("Failed to fetch vault account: {}", e))?;
+    
+    let meme_token = *MEME_TOKEN_PDA;
+    
+    // Get meme token supply
+    let mint = spl_program.account::<Mint>(meme_token)
+        .await
+        .map_err(|e| format!("Failed to fetch mint account: {}", e))?;
+    let meme_token_supply = mint.supply;
+
+    // Calculate required SOL (  withdraw_request.meme_amt * (vault.lamports / meme_token_supply) )
+    let required_sol = (withdraw_request.meme_amt as u64)
+        .checked_mul(vault.lamports)
+        .and_then(|product| product.checked_div(meme_token_supply))
+        .ok_or("Failed to calculate required SOL: overflow or division by zero")?;
+
+    if required_sol <= vault.lamports {
+        println!("Processing withdraw request {} with {} SOL", request_pubkey, required_sol);
+        
+        // Call fill_withdraw_request with the calculated amount
+        let tx = fill_withdraw_request(
+            program,
+            aggregator_keypair,
+            request_pubkey,
+            &withdraw_request,
+            required_sol
+        ).await?;
+        
+        println!("Fill withdraw request transaction: {}", tx);
+        Ok(())
+    } else {
+        Err(format!(
+            "Insufficient SOL in vault. Need {} SOL but vault only has {} SOL",
+            required_sol, vault.lamports
+        ))
+    }
+}
+
+pub async fn process_withdraw_requests_batch(
+    program: &Program<Rc<Keypair>>,
+    spl_program: &Program<Rc<Keypair>>,
+    aggregator_keypair: &Keypair,
+    withdraw_requests: Vec<(Pubkey, memepool::accounts::WithdrawRequest)>
+) -> Vec<Result<(), String>> {
+    let mut results = Vec::with_capacity(withdraw_requests.len());
+    
+    for (request_pubkey, withdraw_request) in withdraw_requests {
+        println!("Starting to process request {}", request_pubkey);
+        
+        let result = process_withdraw_request(
+            program,
+            spl_program,
+            aggregator_keypair,
+            request_pubkey,
+            withdraw_request
+        ).await;
+        
+        match &result {
+            Ok(_) => println!("Successfully processed request {}", request_pubkey),
+            Err(e) => println!("Failed to process request {}: {}", request_pubkey, e),
+        }
+        
+        results.push(result);
+    }
+    
+    results
+} 

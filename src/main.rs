@@ -4,6 +4,15 @@ mod vault;
 use tokio::time::{interval, Duration};
 use anchor_lang::prelude::declare_program;
 
+/*
+
+TODO:
+swap 
+deposit lp
+withdraw lp
+
+*/
+
 // NOTE: declare_program! does not handle constants in IDL properly, just remove and define elsewhere
 declare_program!(memepool);
 
@@ -15,7 +24,7 @@ async fn main() {
     let mut interval = interval(Duration::from_secs(5));
     loop {
         interval.tick().await;
-
+        
         // Get pending withdraw requests (status = 0)
         let withdraw_requests = vault::get_withdraw_requests(&program, Some(0), None).await;
         

@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use crate::memepool;
 use super::{
-    utils::{VAULT_PDA, MEME_TOKEN_PDA},
+    utils::{VAULT_PDA, MEME_MINT_PDA},
     instructions::fill_withdraw_request,
 };
 
@@ -20,15 +20,12 @@ pub async fn process_withdraw_request(
     withdraw_request: memepool::accounts::WithdrawRequest,
 ) -> Result<(), String> {
     // Get the vault account
-    let vault_address = *VAULT_PDA;
-    let vault = program.account::<memepool::accounts::Vault>(vault_address)
+    let vault = program.account::<memepool::accounts::Vault>(*VAULT_PDA)
         .await
         .map_err(|e| format!("Failed to fetch vault account: {}", e))?;
     
-    let meme_token = *MEME_TOKEN_PDA;
-    
     // Get meme token supply
-    let mint = spl_program.account::<Mint>(meme_token)
+    let mint = spl_program.account::<Mint>(*MEME_MINT_PDA)
         .await
         .map_err(|e| format!("Failed to fetch mint account: {}", e))?;
     let meme_token_supply = mint.supply;

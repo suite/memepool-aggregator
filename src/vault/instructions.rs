@@ -7,7 +7,7 @@ use anchor_spl::token::spl_token;
 use std::rc::Rc;
 
 use crate::memepool;
-use super::utils::{VAULT_PDA, MEME_TOKEN_PDA};
+use super::utils::{VAULT_PDA, MEME_MINT_PDA};
 
 pub async fn fill_withdraw_request(
     program: &Program<Rc<Keypair>>,
@@ -17,7 +17,7 @@ pub async fn fill_withdraw_request(
     fill_lamports: u64,
 ) -> Result<String, String> {
     let vault_address = *VAULT_PDA;
-    let meme_token = *MEME_TOKEN_PDA;
+    let meme_token = *MEME_MINT_PDA;
     
     let withdraw_request_meme_ata = anchor_spl::associated_token::get_associated_token_address(
         &request_pubkey,

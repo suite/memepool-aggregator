@@ -26,7 +26,11 @@ async fn main() {
         interval.tick().await;
         
         // Get pending withdraw requests (status = 0)
-        let withdraw_requests = vault::get_withdraw_requests(&program, Some(0), None).await;
+        let withdraw_requests = vault::get_withdraw_requests(
+            &program,
+            Some(0),
+            None
+        ).await;
         
         if !withdraw_requests.is_empty() {
             println!("Processing {} withdraw requests...", withdraw_requests.len());
@@ -38,7 +42,10 @@ async fn main() {
             ).await;
             
             // Count successes and failures
-            let (successes, failures): (Vec<_>, Vec<_>) = results.into_iter().partition(Result::is_ok);
+            let (successes, failures): (Vec<_>, Vec<_>) = results
+                .into_iter()
+                .partition(Result::is_ok);
+                
             println!(
                 "Batch processing complete. Successful: {}, Failed: {}",
                 successes.len(),

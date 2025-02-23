@@ -17,11 +17,11 @@ pub async fn fill_withdraw_request(
     fill_lamports: u64,
 ) -> Result<String, String> {
     let vault_address = *VAULT_PDA;
-    let meme_token = *MEME_MINT_PDA;
+    let meme_mint = *MEME_MINT_PDA;
     
     let withdraw_request_meme_ata = anchor_spl::associated_token::get_associated_token_address(
         &request_pubkey,
-        &meme_token,
+        &meme_mint,
     );
 
     let accounts = memepool::client::accounts::VaultFillWithdraw {
@@ -29,7 +29,7 @@ pub async fn fill_withdraw_request(
         withdrawer: withdraw_request.user,
         withdraw_request: request_pubkey,
         vault: vault_address,
-        meme_mint: meme_token,
+        meme_mint: meme_mint,
         withdraw_request_meme_ata,
         system_program: system_program::ID,
         token_program: spl_token::ID,

@@ -1,9 +1,9 @@
 use anchor_client::{
-    solana_client::rpc_filter::{Memcmp, MemcmpEncodedBytes, RpcFilterType}, solana_sdk::signature::Keypair, Program
+    solana_client::rpc_filter::{Memcmp, MemcmpEncodedBytes, RpcFilterType}, solana_sdk::{signature::Keypair, signer::Signer, system_program}, Program
 };
 use anchor_lang::prelude::Pubkey;
 use std::rc::Rc;
-use anchor_spl::token::Mint;
+use anchor_spl::token::{spl_token, Mint};
 
 use crate::memepool;
 
@@ -22,6 +22,7 @@ pub fn get_vault_pda() -> Pubkey {
 pub async fn process_withdraw_request(
     program: &Program<Rc<Keypair>>,
     spl_program: &Program<Rc<Keypair>>,
+    aggregator_keypair: &Keypair,
     request_pubkey: Pubkey,
     withdraw_request: memepool::accounts::WithdrawRequest,
 ) -> Result<(), String> {
@@ -47,7 +48,17 @@ pub async fn process_withdraw_request(
 
     if required_sol <= vault.lamports {
         println!("Processing withdraw request {} with {} SOL", request_pubkey, required_sol);
-        // TODO: Call fill_withdraw_request instruction
+        
+        // Call fill_withdraw_request with the calculated amount
+        let tx = fill_withdraw_request(
+            program,
+            aggregator_keypair,
+            request_pubkey,
+            &withdraw_request,
+            required_sol
+        ).await?;
+        
+        println!("Fill withdraw request transaction: {}", tx);
         Ok(())
     } else {
         Err(format!(
@@ -60,6 +71,7 @@ pub async fn process_withdraw_request(
 pub async fn process_withdraw_requests_batch(
     program: &Program<Rc<Keypair>>,
     spl_program: &Program<Rc<Keypair>>,
+    aggregator_keypair: &Keypair,
     withdraw_requests: Vec<(Pubkey, memepool::accounts::WithdrawRequest)>
 ) -> Vec<Result<(), String>> {
     let mut results = Vec::with_capacity(withdraw_requests.len());
@@ -67,7 +79,13 @@ pub async fn process_withdraw_requests_batch(
     for (request_pubkey, withdraw_request) in withdraw_requests {
         println!("Starting to process request {}", request_pubkey);
         
-        let result = process_withdraw_request(program, spl_program, request_pubkey, withdraw_request).await;
+        let result = process_withdraw_request(
+            program,
+            spl_program,
+            aggregator_keypair,
+            request_pubkey,
+            withdraw_request
+        ).await;
         
         match &result {
             Ok(_) => println!("Successfully processed request {}", request_pubkey),
@@ -107,4 +125,45 @@ pub async fn get_withdraw_requests(
     }
 
     program.accounts(filters).await.unwrap()
+}
+
+pub async fn fill_withdraw_request(
+    program: &Program<Rc<Keypair>>,
+    aggregator_keypair: &Keypair,
+    request_pubkey: Pubkey,
+    withdraw_request: &memepool::accounts::WithdrawRequest,
+    fill_lamports: u64,
+) -> Result<String, String> {
+    let vault_address = get_vault_pda();
+    let meme_token = get_meme_token_pda();
+    
+    let withdraw_request_meme_ata = anchor_spl::associated_token::get_associated_token_address(
+        &request_pubkey,
+        &meme_token,
+    );
+
+    let accounts = memepool::client::accounts::VaultFillWithdraw {
+        aggregator: aggregator_keypair.pubkey(),
+        withdrawer: withdraw_request.user,
+        withdraw_request: request_pubkey,
+        vault: vault_address,
+        meme_mint: meme_token,
+        withdraw_request_meme_ata,
+        system_program: system_program::ID,
+        token_program: spl_token::ID,
+    };
+
+    let args = memepool::client::args::VaultFillWithdraw { fill_lamports };
+    
+    let tx_builder = program
+        .request()
+        .args(args)
+        .accounts(accounts);
+
+    let tx = tx_builder
+        .send()
+        .await
+        .map_err(|e| format!("Failed to send fill withdraw transaction: {}", e))?;
+
+    Ok(tx.to_string())
 }

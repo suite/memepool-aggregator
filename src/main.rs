@@ -10,9 +10,9 @@ declare_program!(memepool);
 #[tokio::main]
 async fn main() {
     let aggregator_keypair = client::load_aggregator_keypair();
-    let (program, spl_program) = client::get_programs(aggregator_keypair);
+    let (program, spl_program) = client::get_programs(&aggregator_keypair);
 
-    let mut interval = interval(Duration::from_secs(10));
+    let mut interval = interval(Duration::from_secs(5));
     loop {
         interval.tick().await;
 
@@ -21,7 +21,12 @@ async fn main() {
         
         if !withdraw_requests.is_empty() {
             println!("Processing {} withdraw requests...", withdraw_requests.len());
-            let results = vault::process_withdraw_requests_batch(&program, &spl_program, withdraw_requests).await;
+            let results = vault::process_withdraw_requests_batch(
+                &program,
+                &spl_program,
+                &aggregator_keypair,
+                withdraw_requests
+            ).await;
             
             // Count successes and failures
             let (successes, failures): (Vec<_>, Vec<_>) = results.into_iter().partition(Result::is_ok);
@@ -30,6 +35,8 @@ async fn main() {
                 successes.len(),
                 failures.len()
             );
+        } else {
+            println!("No pending withdraw requests found, sleeping");
         }
     }
 }

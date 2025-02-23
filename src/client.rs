@@ -16,16 +16,12 @@ pub fn load_aggregator_keypair() -> Keypair {
     Keypair::from_bytes(&keypair_bytes).expect("Failed to create Keypair from bytes")
 }
 
-fn get_provider(keypair: Keypair) -> Client<Rc<Keypair>> {
-    Client::new_with_options(
+pub fn get_programs(aggregator_keypair: &Keypair) -> (Program<Rc<Keypair>>, Program<Rc<Keypair>>) {
+    let provider = Client::new_with_options(
         Cluster::Devnet,
-        Rc::new(keypair),
+        Rc::new(aggregator_keypair.insecure_clone()),
         CommitmentConfig::confirmed(),
-    )
-}
-
-pub fn get_programs(aggregator_keypair: Keypair) -> (Program<Rc<Keypair>>, Program<Rc<Keypair>>) {
-    let provider = get_provider(aggregator_keypair);
+    );
     let memepool_program = provider.program(memepool::ID).unwrap();
     let spl_program = provider.program(anchor_spl::token::ID).unwrap();
     (memepool_program, spl_program)

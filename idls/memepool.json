@@ -1,0 +1,1582 @@
+{
+  "address": "F2f16ivA9a7BwLA6hmLcny2fD15XDToBnpxERVNdtwSy",
+  "metadata": {
+    "name": "memepool",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "lp_deposit",
+      "discriminator": [
+        27,
+        77,
+        210,
+        69,
+        12,
+        43,
+        148,
+        16
+      ],
+      "accounts": [
+        {
+          "name": "vault_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool_state"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "aggregator",
+          "writable": true,
+          "signer": true,
+          "address": "4tvxgUWQM7EtyW8FYjdNdexzHn4iSFFDYduqzdNaEfHW"
+        },
+        {
+          "name": "cp_swap_program",
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+        },
+        {
+          "name": "authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  97,
+                  110,
+                  100,
+                  95,
+                  108,
+                  112,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cp_swap_program"
+            }
+          }
+        },
+        {
+          "name": "pool_state",
+          "writable": true
+        },
+        {
+          "name": "owner_lp_token",
+          "docs": [
+            "Owner lp token account"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "lp_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_0_account",
+          "docs": [
+            "The payer's token account for token_0"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_1_account",
+          "docs": [
+            "The payer's token account for token_1"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_0_vault",
+          "docs": [
+            "The address that holds pool tokens for token_0"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_1_vault",
+          "docs": [
+            "The address that holds pool tokens for token_1"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "docs": [
+            "token Program"
+          ],
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_program_2022",
+          "docs": [
+            "Token program 2022"
+          ],
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "vault_0_mint",
+          "docs": [
+            "The mint of token_0 vault"
+          ]
+        },
+        {
+          "name": "vault_1_mint",
+          "docs": [
+            "The mint of token_1 vault"
+          ]
+        },
+        {
+          "name": "lp_mint",
+          "docs": [
+            "Lp token mint"
+          ],
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "lp_token_amount",
+          "type": "u64"
+        },
+        {
+          "name": "maximum_token_0_amount",
+          "type": "u64"
+        },
+        {
+          "name": "maximum_token_1_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "vault_deposit",
+      "discriminator": [
+        231,
+        150,
+        41,
+        113,
+        180,
+        104,
+        162,
+        120
+      ],
+      "accounts": [
+        {
+          "name": "depositer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "meme_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "depositer_meme_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "depositer"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "meme_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": [
+        {
+          "name": "deposit_lamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "vault_fill_withdraw",
+      "discriminator": [
+        50,
+        130,
+        155,
+        163,
+        108,
+        240,
+        244,
+        205
+      ],
+      "accounts": [
+        {
+          "name": "aggregator",
+          "writable": true,
+          "signer": true,
+          "address": "4tvxgUWQM7EtyW8FYjdNdexzHn4iSFFDYduqzdNaEfHW"
+        },
+        {
+          "name": "withdrawer"
+        },
+        {
+          "name": "withdraw_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  105,
+                  116,
+                  104,
+                  100,
+                  114,
+                  97,
+                  119,
+                  95,
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "withdrawer"
+              },
+              {
+                "kind": "account",
+                "path": "withdraw_request.count",
+                "account": "WithdrawRequest"
+              }
+            ]
+          }
+        },
+        {
+          "name": "withdraw_request_meme_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "withdraw_request"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "meme_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "meme_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fill_lamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "vault_finalize_withdraw",
+      "discriminator": [
+        121,
+        153,
+        21,
+        107,
+        74,
+        16,
+        198,
+        17
+      ],
+      "accounts": [
+        {
+          "name": "withdrawer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "withdraw_request_meme_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "withdraw_request"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "meme_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "withdraw_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  105,
+                  116,
+                  104,
+                  100,
+                  114,
+                  97,
+                  119,
+                  95,
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "withdrawer"
+              },
+              {
+                "kind": "account",
+                "path": "withdraw_request.count",
+                "account": "WithdrawRequest"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "meme_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "vault_initialize",
+      "discriminator": [
+        164,
+        192,
+        189,
+        148,
+        250,
+        255,
+        120,
+        250
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "meme_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "vault_request_withdraw",
+      "discriminator": [
+        101,
+        225,
+        161,
+        20,
+        123,
+        23,
+        117,
+        123
+      ],
+      "accounts": [
+        {
+          "name": "withdrawer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "meme_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  109,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "withdrawer_meme_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "withdrawer"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "meme_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "portfolio",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  114,
+                  116,
+                  102,
+                  111,
+                  108,
+                  105,
+                  111
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "withdrawer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "withdraw_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  119,
+                  105,
+                  116,
+                  104,
+                  100,
+                  114,
+                  97,
+                  119,
+                  95,
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "withdrawer"
+              },
+              {
+                "kind": "account",
+                "path": "portfolio.counter",
+                "account": "Portfolio"
+              }
+            ]
+          }
+        },
+        {
+          "name": "withdraw_request_meme_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "withdraw_request"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "meme_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "meme_amt",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "PoolState",
+      "discriminator": [
+        247,
+        237,
+        227,
+        245,
+        215,
+        195,
+        222,
+        70
+      ]
+    },
+    {
+      "name": "Portfolio",
+      "discriminator": [
+        94,
+        158,
+        71,
+        245,
+        122,
+        102,
+        110,
+        225
+      ]
+    },
+    {
+      "name": "Vault",
+      "discriminator": [
+        211,
+        8,
+        232,
+        43,
+        2,
+        152,
+        117,
+        119
+      ]
+    },
+    {
+      "name": "VaultPool",
+      "discriminator": [
+        64,
+        55,
+        145,
+        17,
+        146,
+        105,
+        18,
+        195
+      ]
+    },
+    {
+      "name": "WithdrawRequest",
+      "discriminator": [
+        186,
+        239,
+        174,
+        191,
+        189,
+        13,
+        47,
+        196
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidMEMEAmount",
+      "msg": "Error calculating $MEME mint amount"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidSOLAmount",
+      "msg": "Error calculating $SOL transfer amount"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidVault",
+      "msg": "Error calculating vault lamports"
+    },
+    {
+      "code": 6003,
+      "name": "VaultOOS",
+      "msg": "Vault OUT OF SOL"
+    },
+    {
+      "code": 6004,
+      "name": "WithdrawRequestNotReady",
+      "msg": "Withdraw Request status not ready"
+    },
+    {
+      "code": 6005,
+      "name": "WithdrawRequestReady",
+      "msg": "Withdraw Request status ready"
+    }
+  ],
+  "types": [
+    {
+      "name": "PoolState",
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c",
+        "packed": true
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amm_config",
+            "docs": [
+              "Which config the pool belongs"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "pool_creator",
+            "docs": [
+              "pool creator"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_0_vault",
+            "docs": [
+              "Token A"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_1_vault",
+            "docs": [
+              "Token B"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "lp_mint",
+            "docs": [
+              "Pool tokens are issued when A or B tokens are deposited.",
+              "Pool tokens can be withdrawn back to the original A or B token."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_0_mint",
+            "docs": [
+              "Mint information for token A"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_1_mint",
+            "docs": [
+              "Mint information for token B"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_0_program",
+            "docs": [
+              "token_0 program"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_1_program",
+            "docs": [
+              "token_1 program"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "observation_key",
+            "docs": [
+              "observation account to store oracle data"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "auth_bump",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Bitwise representation of the state of the pool",
+              "bit0, 1: disable deposit(vaule is 1), 0: normal",
+              "bit1, 1: disable withdraw(vaule is 2), 0: normal",
+              "bit2, 1: disable swap(vaule is 4), 0: normal"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "lp_mint_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "mint_0_decimals",
+            "docs": [
+              "mint0 and mint1 decimals"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "mint_1_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "lp_supply",
+            "docs": [
+              "lp mint supply"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "protocol_fees_token_0",
+            "docs": [
+              "The amounts of token_0 and token_1 that are owed to the liquidity provider."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "protocol_fees_token_1",
+            "type": "u64"
+          },
+          {
+            "name": "fund_fees_token_0",
+            "type": "u64"
+          },
+          {
+            "name": "fund_fees_token_1",
+            "type": "u64"
+          },
+          {
+            "name": "open_time",
+            "docs": [
+              "The timestamp allowed for swap in the pool."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding for future updates"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Portfolio",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "counter",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "meme_bump",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultPool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "pool_id",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WithdrawRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "meme_amt",
+            "type": "u64"
+          },
+          {
+            "name": "count",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

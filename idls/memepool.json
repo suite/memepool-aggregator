@@ -301,6 +301,383 @@
       ]
     },
     {
+      "name": "lp_swap",
+      "discriminator": [
+        219,
+        74,
+        222,
+        114,
+        189,
+        235,
+        195,
+        96
+      ],
+      "accounts": [
+        {
+          "name": "aggregator",
+          "writable": true,
+          "signer": true,
+          "address": "4tvxgUWQM7EtyW8FYjdNdexzHn4iSFFDYduqzdNaEfHW"
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "cp_swap_program",
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+        },
+        {
+          "name": "authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  97,
+                  110,
+                  100,
+                  95,
+                  108,
+                  112,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cp_swap_program"
+            }
+          }
+        },
+        {
+          "name": "amm_config",
+          "docs": [
+            "The factory state to read protocol fees"
+          ]
+        },
+        {
+          "name": "pool_state",
+          "docs": [
+            "The program account of the pool in which the swap will be performed"
+          ],
+          "writable": true
+        },
+        {
+          "name": "input_token_account",
+          "docs": [
+            "The user token account for input token"
+          ],
+          "writable": true
+        },
+        {
+          "name": "output_token_account",
+          "docs": [
+            "The user token account for output token"
+          ],
+          "writable": true
+        },
+        {
+          "name": "input_vault",
+          "docs": [
+            "The vault token account for input token"
+          ],
+          "writable": true
+        },
+        {
+          "name": "output_vault",
+          "docs": [
+            "The vault token account for output token"
+          ],
+          "writable": true
+        },
+        {
+          "name": "input_token_program",
+          "docs": [
+            "SPL program for input token transfers"
+          ]
+        },
+        {
+          "name": "output_token_program",
+          "docs": [
+            "SPL program for output token transfers"
+          ]
+        },
+        {
+          "name": "input_token_mint",
+          "docs": [
+            "The mint of input token"
+          ]
+        },
+        {
+          "name": "output_token_mint",
+          "docs": [
+            "The mint of output token"
+          ]
+        },
+        {
+          "name": "observation_state",
+          "docs": [
+            "The program account for the most recent oracle observation"
+          ],
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount_in",
+          "type": "u64"
+        },
+        {
+          "name": "minimum_amount_out",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "lp_withdraw",
+      "discriminator": [
+        205,
+        206,
+        130,
+        170,
+        173,
+        51,
+        11,
+        169
+      ],
+      "accounts": [
+        {
+          "name": "vault_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool_state"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "aggregator",
+          "writable": true,
+          "signer": true,
+          "address": "4tvxgUWQM7EtyW8FYjdNdexzHn4iSFFDYduqzdNaEfHW"
+        },
+        {
+          "name": "cp_swap_program",
+          "address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+        },
+        {
+          "name": "authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  97,
+                  110,
+                  100,
+                  95,
+                  108,
+                  112,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  95,
+                  115,
+                  101,
+                  101,
+                  100
+                ]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "cp_swap_program"
+            }
+          }
+        },
+        {
+          "name": "pool_state",
+          "docs": [
+            "Pool state account"
+          ],
+          "writable": true
+        },
+        {
+          "name": "owner_lp_token",
+          "docs": [
+            "Owner lp token account"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_0_account",
+          "docs": [
+            "The owner's token account for receive token_0"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_1_account",
+          "docs": [
+            "The owner's token account for receive token_1"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_0_vault",
+          "docs": [
+            "The address that holds pool tokens for token_0"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_1_vault",
+          "docs": [
+            "The address that holds pool tokens for token_1"
+          ],
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "docs": [
+            "token Program"
+          ],
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "token_program_2022",
+          "docs": [
+            "Token program 2022"
+          ],
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "vault_0_mint",
+          "docs": [
+            "The mint of token_0 vault"
+          ]
+        },
+        {
+          "name": "vault_1_mint",
+          "docs": [
+            "The mint of token_1 vault"
+          ]
+        },
+        {
+          "name": "lp_mint",
+          "docs": [
+            "Pool lp token mint"
+          ],
+          "writable": true
+        },
+        {
+          "name": "memo_program",
+          "docs": [
+            "memo program"
+          ],
+          "address": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+        }
+      ],
+      "args": [
+        {
+          "name": "lp_token_amount",
+          "type": "u64"
+        },
+        {
+          "name": "maximum_token_0_amount",
+          "type": "u64"
+        },
+        {
+          "name": "maximum_token_1_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "vault_deposit",
       "discriminator": [
         231,
@@ -354,6 +731,9 @@
           }
         },
         {
+          "name": "wsol_mint"
+        },
+        {
           "name": "depositer_meme_ata",
           "writable": true,
           "pda": {
@@ -402,6 +782,96 @@
               {
                 "kind": "account",
                 "path": "meme_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "vault_wsol_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "wsol_mint"
               }
             ],
             "program": {
@@ -614,6 +1084,186 @@
           }
         },
         {
+          "name": "vault_wsol_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "wsol_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "temp_vault_wsol_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "withdraw_request"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "wsol_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
           "name": "vault",
           "writable": true,
           "pda": {
@@ -649,12 +1299,19 @@
           }
         },
         {
+          "name": "wsol_mint"
+        },
+        {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         }
       ],
       "args": [
@@ -1238,6 +1895,32 @@
   ],
   "accounts": [
     {
+      "name": "AmmConfig",
+      "discriminator": [
+        218,
+        244,
+        33,
+        104,
+        203,
+        203,
+        43,
+        111
+      ]
+    },
+    {
+      "name": "ObservationState",
+      "discriminator": [
+        122,
+        174,
+        197,
+        53,
+        129,
+        9,
+        165,
+        132
+      ]
+    },
+    {
       "name": "PoolState",
       "discriminator": [
         247,
@@ -1336,6 +2019,188 @@
     }
   ],
   "types": [
+    {
+      "name": "AmmConfig",
+      "docs": [
+        "Holds the current owner of the factory"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "Bump to identify PDA"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "disable_create_pool",
+            "docs": [
+              "Status to control if new pool can be create"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "index",
+            "docs": [
+              "Config index"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "trade_fee_rate",
+            "docs": [
+              "The trade fee, denominated in hundredths of a bip (10^-6)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "protocol_fee_rate",
+            "docs": [
+              "The protocol fee"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fund_fee_rate",
+            "docs": [
+              "The fund fee, denominated in hundredths of a bip (10^-6)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "create_pool_fee",
+            "docs": [
+              "Fee for create a new pool"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "protocol_owner",
+            "docs": [
+              "Address of the protocol fee owner"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "fund_owner",
+            "docs": [
+              "Address of the fund fee owner"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Observation",
+      "docs": [
+        "The element of observations in ObservationState"
+      ],
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c",
+        "packed": true
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "block_timestamp",
+            "docs": [
+              "The block timestamp of the observation"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "cumulative_token_0_price_x32",
+            "docs": [
+              "the cumulative of token0 price during the duration time, Q32.32, the remaining 64 bit for overflow"
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "cumulative_token_1_price_x32",
+            "docs": [
+              "the cumulative of token1 price during the duration time, Q32.32, the remaining 64 bit for overflow"
+            ],
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ObservationState",
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c",
+        "packed": true
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "initialized",
+            "docs": [
+              "Whether the ObservationState is initialized"
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "observation_index",
+            "docs": [
+              "the most-recently updated index of the observations array"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "pool_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "observations",
+            "docs": [
+              "observation array"
+            ],
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "Observation"
+                  }
+                },
+                100
+              ]
+            }
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding for feature update"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                4
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "PoolState",
       "serialization": "bytemuckunsafe",

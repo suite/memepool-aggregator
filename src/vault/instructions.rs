@@ -71,11 +71,10 @@ pub async fn lp_swap(
     aggregator_keypair: &Keypair,
     amount_in: u64,
     minimum_amount_out: u64,
+    is_base_token: bool, // true: swap WSOL to test token, false: swap test token to WSOL
 ) -> Result<String, String> {
     let vault_address = *VAULT_PDA;
-    let cp_swap_program = CP_SWAP_PROGRAM;
-    let wsol_mint = WSOL_MINT;
-    let test_token = TEST_TOKEN_MINT;
+    let cp_swap_program = CP_SWAP_PROGRAM;;
     let pool_address = POOL_ADDRESS;
 
     let pool_state = get_pool_state(raydium_program, pool_address)
@@ -91,15 +90,27 @@ pub async fn lp_swap(
     // Get authority PDA for the swap program
     let authority = *SWAP_AUTHORITY_PDA;
     
-    // Get token accounts
-    let input_token_account = anchor_spl::associated_token::get_associated_token_address(
-        &vault_address,
-        &mint_a,
-    );
-    let output_token_account = anchor_spl::associated_token::get_associated_token_address(
-        &vault_address,
-        &mint_b,
-    );
+    // Determine input and output based on swap direction
+    let (input_token_account, output_token_account, input_vault, output_vault, input_token_mint, output_token_mint) = 
+    if is_base_token {
+        (
+            anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_a),
+            anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_b),
+            vault_a,
+            vault_b,
+            mint_a,
+            mint_b,
+        )
+    } else {
+        (
+            anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_b),
+            anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_a),
+            vault_b,
+            vault_a,
+            mint_b,
+            mint_a
+        )
+    };
 
     // Get oracle observation address
     let observation_address = get_oracle_pda(&pool_address);
@@ -113,12 +124,12 @@ pub async fn lp_swap(
         pool_state: pool_address,
         input_token_account,
         output_token_account,
-        input_vault: vault_a,
-        output_vault: vault_b,
+        input_vault,
+        output_vault,
         input_token_program: spl_token::ID,
         output_token_program: spl_token::ID,
-        input_token_mint: wsol_mint,
-        output_token_mint: test_token,
+        input_token_mint,
+        output_token_mint,
         observation_state: observation_address,
     };
 

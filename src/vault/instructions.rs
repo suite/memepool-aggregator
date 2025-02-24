@@ -6,7 +6,7 @@ use anchor_lang::prelude::Pubkey;
 use anchor_spl::token::spl_token;
 use std::rc::Rc;
 
-use crate::memepool;
+use crate::{memepool, raydium::get_pool_state};
 use super::utils::{get_oracle_pda, CP_SWAP_PROGRAM, MEME_MINT_PDA, POOL_ADDRESS, SWAP_AUTHORITY_PDA, TEST_TOKEN_MINT, VAULT_PDA, WSOL_MINT};
 
 pub async fn fill_withdraw_request(
@@ -67,6 +67,7 @@ pub async fn fill_withdraw_request(
 
 pub async fn lp_swap(
     program: &Program<Rc<Keypair>>,
+    raydium_program: &Program<Rc<Keypair>>,
     aggregator_keypair: &Keypair,
     amount_in: u64,
     minimum_amount_out: u64,
@@ -77,13 +78,15 @@ pub async fn lp_swap(
     let test_token = TEST_TOKEN_MINT;
     let pool_address = POOL_ADDRESS;
 
-    // TODO: These should be fetched from pool info in the future
-    let config_id = Pubkey::try_from("11111111111111111111111111111111")
-        .map_err(|e| format!("Invalid config ID: {}", e))?;
-    let vault_a = Pubkey::try_from("11111111111111111111111111111111")
-        .map_err(|e| format!("Invalid vault A: {}", e))?;
-    let vault_b = Pubkey::try_from("11111111111111111111111111111111")
-        .map_err(|e| format!("Invalid vault B: {}", e))?;
+    let pool_state = get_pool_state(raydium_program, pool_address)
+        .await
+        .map_err(|e| format!("Failed to get pool state: {}", e))?;
+
+    let config_id = pool_state.amm_config;
+    let vault_a = pool_state.token_0_vault;
+    let vault_b = pool_state.token_1_vault;
+    let mint_a = pool_state.token_0_mint;
+    let mint_b = pool_state.token_1_mint;
 
     // Get authority PDA for the swap program
     let authority = *SWAP_AUTHORITY_PDA;
@@ -91,11 +94,11 @@ pub async fn lp_swap(
     // Get token accounts
     let input_token_account = anchor_spl::associated_token::get_associated_token_address(
         &vault_address,
-        &wsol_mint,
+        &mint_a,
     );
     let output_token_account = anchor_spl::associated_token::get_associated_token_address(
         &vault_address,
-        &test_token,
+        &mint_b,
     );
 
     // Get oracle observation address
@@ -129,10 +132,27 @@ pub async fn lp_swap(
         .args(args)
         .accounts(accounts);
 
-    let tx = tx_builder
+    let tx = match tx_builder
         .send()
-        .await
-        .map_err(|e| format!("Failed to send swap transaction: {}", e))?;
+        .await 
+    {
+        Ok(sig) => Ok(sig.to_string()),
+        Err(e) => {
+            println!("\nTransaction failed with error:");
+            // println!("{:#?}", e);
+            
+            // TODO: TEMP TO GET PROGRAM LOGS
+            if let anchor_client::ClientError::ProgramError(program_err) = &e {
+                println!("\nProgram error details:");
+                println!("Error code: {}", program_err.to_string());
+            } else if let anchor_client::ClientError::SolanaClientError(rpc_err) = &e {
+                println!("\nRPC error details:");
+                println!("{:#?}", rpc_err);
+            }
+            
+            Err(format!("Failed to send swap transaction: {}", e))
+        }
+    }?;
 
     Ok(tx.to_string())
 }

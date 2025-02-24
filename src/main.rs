@@ -2,10 +2,11 @@ mod client;
 mod vault;
 mod raydium;
 
+use anchor_client::solana_sdk::native_token::LAMPORTS_PER_SOL;
 use raydium::get_pool_state;
 use tokio::time::{interval, Duration};
 use anchor_lang::prelude::declare_program;
-use vault::utils::POOL_ADDRESS;
+use vault::{service::process_lp_deposit, utils::POOL_ADDRESS};
 
 /*
 
@@ -28,9 +29,18 @@ async fn main() {
     let amts = test.get_vault_amounts(&spl_program).await.unwrap();
     println!("test pool: {:?} pool amounts: {:?}", test, amts);
 
+    println!("Initiated test deposit...");
+    let result = process_lp_deposit(&program, &raydium_program, &spl_program, &aggregator_keypair, 10).await;
+    match result {
+        Ok(_) => println!("LP deposit successful"),
+        Err(e) => println!("LP deposit failed: {}", e),
+    }
+
+
+ 
     let mut interval = interval(Duration::from_secs(5));
     loop {
-        interval.tick().await;
+        interval.tick().await;    
         
         // Get pending withdraw requests (status = 0)
         let withdraw_requests = vault::get_withdraw_requests(

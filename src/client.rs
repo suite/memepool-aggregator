@@ -2,7 +2,7 @@ use std::{fs, rc::Rc};
 
 use anchor_client::{solana_sdk::{commitment_config::CommitmentConfig, signature::Keypair}, Client, Cluster, Program};
 
-use crate::memepool;
+use crate::{memepool, vault::utils::CP_SWAP_PROGRAM};
 
 pub fn load_aggregator_keypair() -> Keypair {
     let keypair_str = fs::read_to_string("./target/deploy/aggregator-keypair.json")
@@ -16,7 +16,7 @@ pub fn load_aggregator_keypair() -> Keypair {
     Keypair::from_bytes(&keypair_bytes).expect("Failed to create Keypair from bytes")
 }
 
-pub fn get_programs(aggregator_keypair: &Keypair) -> (Program<Rc<Keypair>>, Program<Rc<Keypair>>) {
+pub fn get_programs(aggregator_keypair: &Keypair) -> (Program<Rc<Keypair>>, Program<Rc<Keypair>>, Program<Rc<Keypair>>) {
     let provider = Client::new_with_options(
         Cluster::Devnet,
         Rc::new(aggregator_keypair.insecure_clone()),
@@ -24,5 +24,6 @@ pub fn get_programs(aggregator_keypair: &Keypair) -> (Program<Rc<Keypair>>, Prog
     );
     let memepool_program = provider.program(memepool::ID).unwrap();
     let spl_program = provider.program(anchor_spl::token::ID).unwrap();
-    (memepool_program, spl_program)
+    let raydium_program = provider.program(CP_SWAP_PROGRAM).unwrap();
+    (memepool_program, spl_program, raydium_program)
 }

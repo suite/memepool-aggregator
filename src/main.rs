@@ -1,8 +1,11 @@
 mod client;
 mod vault;
+mod raydium;
 
+use raydium::get_pool_state;
 use tokio::time::{interval, Duration};
 use anchor_lang::prelude::declare_program;
+use vault::utils::POOL_ADDRESS;
 
 /*
 
@@ -19,7 +22,11 @@ declare_program!(memepool);
 #[tokio::main]
 async fn main() {
     let aggregator_keypair = client::load_aggregator_keypair();
-    let (program, spl_program) = client::get_programs(&aggregator_keypair);
+    let (program, spl_program, raydium_program) = client::get_programs(&aggregator_keypair);
+
+    let test = get_pool_state(&raydium_program, POOL_ADDRESS).await.unwrap();
+    let amts = test.get_vault_amounts(&spl_program).await.unwrap();
+    println!("test pool: {:?} pool amounts: {:?}", test, amts);
 
     let mut interval = interval(Duration::from_secs(5));
     loop {

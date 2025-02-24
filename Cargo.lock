@@ -2270,6 +2270,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "anyhow",
+ "bytemuck",
  "once_cell",
  "serde_json",
  "tokio",

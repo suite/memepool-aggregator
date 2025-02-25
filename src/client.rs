@@ -2,7 +2,8 @@ use std::{fs, rc::Rc};
 
 use anchor_client::{solana_sdk::{commitment_config::CommitmentConfig, signature::Keypair}, Client, Cluster, Program};
 
-use crate::{memepool, vault::utils::CP_SWAP_PROGRAM};
+use crate::{memepool, utils::CP_SWAP_PROGRAM};
+
 
 pub fn load_aggregator_keypair() -> Keypair {
     let keypair_str = fs::read_to_string("./target/deploy/aggregator-keypair.json")

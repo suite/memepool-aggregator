@@ -1,11 +1,14 @@
 mod client;
 mod vault;
 mod raydium;
+mod lp;
+mod utils;
 
+use lp::process_lp_swap;
 use raydium::get_pool_state;
 use tokio::time::{interval, Duration};
 use anchor_lang::prelude::declare_program;
-use vault::{service::process_lp_swap, utils::POOL_ADDRESS};
+use utils::POOL_ADDRESS;
 
 /*
 

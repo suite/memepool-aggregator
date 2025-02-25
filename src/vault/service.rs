@@ -121,7 +121,6 @@ pub async fn process_lp_swap(
             .ok_or("Failed to calculate amount out: overflow or division by zero")?
     };
 
-    // Apply slippage tolerance (e.g., 99 for 99%)
     let minimum_amount_out = amount_out
         .checked_mul(slippage as u128)
         .and_then(|with_slippage| with_slippage.checked_div(100))
@@ -137,12 +136,6 @@ pub async fn process_lp_swap(
         minimum_amount_out,
         base_token, // Pass base_token to determine swap direction
     ).await?;
-
-    println!("Swap executed successfully:");
-    println!("Transaction: {}", swap_tx);
-    println!("Input amount: {}", swap_amount);
-    println!("Expected output amount: {}", minimum_amount_out);
-    println!("Minimum output with slippage ({}%): {}", slippage, minimum_amount_out);
 
     // Return the transaction signature and the expected output amount
     Ok((swap_tx, minimum_amount_out))

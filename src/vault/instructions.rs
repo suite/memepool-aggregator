@@ -7,7 +7,7 @@ use anchor_spl::token::spl_token;
 use std::rc::Rc;
 
 use crate::{memepool, raydium::get_pool_state};
-use super::utils::{get_oracle_pda, CP_SWAP_PROGRAM, MEME_MINT_PDA, POOL_ADDRESS, SWAP_AUTHORITY_PDA, TEST_TOKEN_MINT, VAULT_PDA, WSOL_MINT};
+use super::utils::{get_oracle_pda, CP_SWAP_PROGRAM, MEME_MINT_PDA, POOL_ADDRESS, SWAP_AUTHORITY_PDA, VAULT_PDA, WSOL_MINT};
 
 pub async fn fill_withdraw_request(
     program: &Program<Rc<Keypair>>,
@@ -74,7 +74,7 @@ pub async fn lp_swap(
     is_base_token: bool, // true: swap WSOL to test token, false: swap test token to WSOL
 ) -> Result<String, String> {
     let vault_address = *VAULT_PDA;
-    let cp_swap_program = CP_SWAP_PROGRAM;;
+    let cp_swap_program = CP_SWAP_PROGRAM;
     let pool_address = POOL_ADDRESS;
 
     let pool_state = get_pool_state(raydium_program, pool_address)

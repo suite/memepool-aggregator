@@ -2,7 +2,6 @@ use anchor_lang::prelude::{Pubkey, pubkey};
 use crate::memepool;
 use once_cell::sync::Lazy;
 
-// Constants for swap functionality
 pub const CP_SWAP_PROGRAM: Pubkey = pubkey!("CPMDWBwJDtYax9qW7AyRuVC19Cc4L4Vcy4n2BHAbHkCW"); // DEVNET CPMM ADDRESS
 pub const WSOL_MINT: Pubkey = pubkey!("So11111111111111111111111111111111111111112");
 pub const _TEST_TOKEN_MINT: Pubkey = pubkey!("DcPRHwtoWCtzt8WwtD7VdMHvMLtHya7WPknH6kmUsUbw");

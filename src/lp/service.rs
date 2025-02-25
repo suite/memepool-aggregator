@@ -4,8 +4,11 @@ use anchor_client::{
     solana_sdk::signature::Keypair,
     Program
 };
+use anchor_lang::prelude::Pubkey;
 
 use crate::{raydium::get_pool_state, utils::POOL_ADDRESS};
+
+use super::utils::calculate_lp_amount;
 
 pub async fn process_lp_swap(
     program: &Program<Rc<Keypair>>,
@@ -16,6 +19,7 @@ pub async fn process_lp_swap(
     base_token: bool, // true: swap WSOL into other token, false: swap other token into WSOL
     slippage: u64, // slippage tolerance (e.g., 99 for 99%)
 ) -> Result<(String, u64), String> {
+    // TODO: take in pool_state as param, maybe not
     // Get pool state and amounts
     let pool_state = get_pool_state(raydium_program, POOL_ADDRESS)
         .await
@@ -46,6 +50,10 @@ pub async fn process_lp_swap(
         .and_then(|final_result| u64::try_from(final_result).ok())
         .ok_or("Failed to apply slippage: overflow or conversion error")?;
 
+    if minimum_amount_out == 0 {
+        return Err("Minimum output amount cannot be zero".to_string());
+    }
+
     // Execute the swap
     let swap_tx = super::instructions::lp_swap(
         program,
@@ -60,64 +68,75 @@ pub async fn process_lp_swap(
     Ok((swap_tx, minimum_amount_out))
 }
 
-/// Calculate the expected LP token amount based on the token amounts and pool state
-/// 
-/// This follows Raydium's specified_tokens_to_lp_tokens logic:
-/// lp_amount = min(
-///    token0_amount * (lp_supply / token0_pool_amount),
-///    token1_amount * (lp_supply / token1_pool_amount)
-/// )
-/// 
-/// * `token0_amount` - Amount of token0 (usually WSOL)
-/// * `token1_amount` - Amount of token1 (the other token)
-/// * `pool_state` - The current pool state
-/// * `pool_amounts` - The current pool amounts (token0, token1)
-pub fn calculate_lp_amount(
-    token0_amount: u64,
-    token1_amount: u64,
-    lp_supply: u64,
-    pool_amount0: u64,
-    pool_amount1: u64,
-) -> Result<u64, String> {
-    let lp_amount = std::cmp::min(
-        ((token0_amount as u128)
-            .checked_mul(lp_supply as u128)
-            .and_then(|product| product.checked_div(pool_amount0 as u128))
-            .and_then(|result| u64::try_from(result).ok()))
-            .ok_or("Failed to calculate LP amount from token0")?,
-        ((token1_amount as u128)
-            .checked_mul(lp_supply as u128)
-            .and_then(|product| product.checked_div(pool_amount1 as u128))
-            .and_then(|result| u64::try_from(result).ok()))
-            .ok_or("Failed to calculate LP amount from token1")?
-    );
-    
-    Ok(lp_amount)
+pub async fn process_lp_deposit(
+    program: &Program<Rc<Keypair>>,
+    raydium_program: &Program<Rc<Keypair>>,
+    spl_program: &Program<Rc<Keypair>>,
+    aggregator_keypair: &Keypair,
+    pool_address: Pubkey,
+    deposit_amount: u64, // Amount of WSOL you want to deposit, will split and swap into lp
+) -> Result<(String, String, u64), String> {  // Return (swap_tx, deposit_tx, lp_token_amount)
+    // Swap half
+    let wsol_to_swap = deposit_amount.checked_div(2)
+        .ok_or("Failed to calculate WSOL swap amount: division error")?;
+
+    let wsol_leftover = deposit_amount - wsol_to_swap;
+
+    let slippage = 95;
+    let (swap_tx, minimum_amount_out) = process_lp_swap(
+        program,
+        raydium_program,
+        spl_program,
+        aggregator_keypair,
+        wsol_to_swap,
+        true,
+        slippage,
+    )
+    .await
+    .map_err(|e| format!("Failed to process LP swap: {}", e))?;
+
+    println!("Swapped {} WSOL for {} tokens", wsol_to_swap, minimum_amount_out);
+    println!("Tx: {}", swap_tx);
+
+    // NOTE: Pull in new pool_state after swap
+    let pool_state = get_pool_state(raydium_program, pool_address)
+        .await
+        .map_err(|e| format!("Failed to get pool state: {}", e))?;
+
+    let lp_supply = pool_state.lp_supply;
+    let (pool_amount0, pool_amount1) = pool_state.get_vault_amounts(spl_program).await
+        .map_err(|e| format!("Failed to get vault amounts: {}", e))?;
+
+    let lp_token_amount = calculate_lp_amount(
+        wsol_leftover,
+        minimum_amount_out,
+        lp_supply,
+        pool_amount0,
+        pool_amount1
+    )?;
+
+    // Make sure lp_token_amount != 0
+    if lp_token_amount == 0 {
+        return Err("LP token amount cannot be zero".to_string());
+    }
+
+    let deposit_tx = super::instructions::lp_deposit(
+        program,
+        raydium_program,
+        aggregator_keypair,
+        lp_token_amount,
+        wsol_leftover,
+        minimum_amount_out
+    ).await?;
+
+    println!("Deposited {} WSOL and {} tokens for {} LP tokens", wsol_leftover, minimum_amount_out, lp_token_amount);
+    println!("Tx: {}", deposit_tx);
+
+    Ok((swap_tx, deposit_tx, lp_token_amount))
 }
 
-/// Calculate the expected LP token amount based on a swap followed by LP deposit
-/// 
-/// * `swap_amount` - Amount to swap
-/// * `amount_out` - Expected amount received from swap
-/// * `base_token` - Direction of swap (true: WSOL to other, false: other to WSOL)
-/// * `pool_state` - The current pool state
-/// * `pool_amounts` - The current pool amounts (token0, token1)
-pub fn calculate_lp_amount_after_swap(
-    swap_amount: u64,
-    amount_out: u64,
-    base_token: bool,
-    lp_supply: u64,
-    pool_amount0: u64,
-    pool_amount1: u64,
-) -> Result<u64, String> {
-    // Calculate expected LP token amounts based on swap direction
-    let (token0_amount, token1_amount) = if base_token {
-        // Token0 is WSOL, Token1 is other token
-        (swap_amount, amount_out)
-    } else {
-        // Token0 is WSOL, Token1 is other token
-        (amount_out, swap_amount)
-    };
-    
-    calculate_lp_amount(token0_amount, token1_amount, lp_supply, pool_amount0, pool_amount1)
-} 
+// TODO: Process lp_withdraw
+// take in amount (WSOL) ?
+// take in amount (lp_token_amount)
+// half is WSOL min amount, need to calculate other half
+// swap other token int WSOL

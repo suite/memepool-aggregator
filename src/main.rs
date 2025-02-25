@@ -4,8 +4,6 @@ mod raydium;
 mod lp;
 mod utils;
 
-use lp::process_lp_swap;
-use raydium::get_pool_state;
 use tokio::time::{interval, Duration};
 use anchor_lang::prelude::declare_program;
 use utils::POOL_ADDRESS;
@@ -13,8 +11,6 @@ use utils::POOL_ADDRESS;
 /*
 
 TODO:
-swap 
-deposit lp
 withdraw lp
 
 */
@@ -26,31 +22,44 @@ declare_program!(memepool);
 async fn main() {
     let aggregator_keypair = client::load_aggregator_keypair();
     let (program, spl_program, raydium_program) = client::get_programs(&aggregator_keypair);
+    
+    let debug_lp_deposit = true;
 
-    let test = get_pool_state(&raydium_program, POOL_ADDRESS).await.unwrap();
-    let amts = test.get_vault_amounts(&spl_program).await.unwrap();
-    println!("test pool: {:?} pool amounts: {:?}", test, amts);
+    if debug_lp_deposit {
+        println!("Enter LP deposit amount (or 'q' to quit):");
+        let mut input = String::new();
+        
+        loop {
+            input.clear();
+            if std::io::stdin().read_line(&mut input).is_err() {
+                println!("Failed to read input");
+                continue;
+            }
 
-    println!("Initiated test swap...");
-    let result = process_lp_swap(
-        &program, 
-        &raydium_program, 
-        &spl_program, 
-        &aggregator_keypair, 
-        5, 
-        true,
-        95,
-    ).await;
-    match result {
-        Ok((tx_signature, amount_out)) => {
-            println!("LP swap successful:");
-            println!("Transaction signature: {}", tx_signature);
-            println!("Amount received: {}", amount_out);
-        },
-        Err(e) => println!("LP swap failed: {}", e),
+            let trimmed = input.trim();
+            if trimmed == "q" {
+                break;
+            }
+
+            match trimmed.parse::<u64>() {
+                Ok(amount) => {
+                    println!("Initiating LP deposit of {} tokens...", amount);
+                    match lp::process_lp_deposit(
+                        &program,
+                        &raydium_program,
+                        &spl_program,
+                        &aggregator_keypair,
+                        POOL_ADDRESS,
+                        amount,
+                    ).await {
+                        Ok(_) => println!("Deposit successful"),
+                        Err(e) => println!("Deposit failed: {}", e)
+                    }
+                },
+                Err(_) => println!("Please enter a valid number or 'q' to quit")
+            }
+        }
     }
-
-
  
     let mut interval = interval(Duration::from_secs(5));
     loop {

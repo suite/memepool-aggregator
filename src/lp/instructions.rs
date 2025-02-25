@@ -209,7 +209,6 @@ pub async fn lp_withdraw(
     let vault_address = *VAULT_PDA;
     let cp_swap_program = CP_SWAP_PROGRAM;
     let pool_address = POOL_ADDRESS;
-
     let vault_pool_address = get_vault_pool_pda(&pool_address);
 
      // TODO: pass in pool state

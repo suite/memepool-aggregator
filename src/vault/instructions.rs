@@ -7,7 +7,7 @@ use anchor_spl::token::spl_token;
 use std::rc::Rc;
 
 use crate::{memepool, raydium::get_pool_state};
-use super::utils::{get_oracle_pda, CP_SWAP_PROGRAM, MEME_MINT_PDA, POOL_ADDRESS, SWAP_AUTHORITY_PDA, VAULT_PDA, WSOL_MINT};
+use super::utils::{get_oracle_pda, get_vault_pool_pda, CP_SWAP_PROGRAM, MEME_MINT_PDA, POOL_ADDRESS, SWAP_AUTHORITY_PDA, VAULT_PDA, WSOL_MINT};
 
 pub async fn vault_fill_withdraw(
     program: &Program<Rc<Keypair>>,
@@ -77,6 +77,7 @@ pub async fn lp_swap(
     let cp_swap_program = CP_SWAP_PROGRAM;
     let pool_address = POOL_ADDRESS;
 
+    // TODO: pass in pool state
     let pool_state = get_pool_state(raydium_program, pool_address)
         .await
         .map_err(|e| format!("Failed to get pool state: {}", e))?;
@@ -164,6 +165,80 @@ pub async fn lp_swap(
             Err(format!("Failed to send swap transaction: {}", e))
         }
     }?;
+
+    Ok(tx.to_string())
+}
+
+pub async fn lp_deposit(
+    program: &Program<Rc<Keypair>>,
+    raydium_program: &Program<Rc<Keypair>>,
+    aggregator_keypair: &Keypair,
+    lp_token_amount: u64,
+    maximum_token_0_amount: u64,
+    maximum_token_1_amount: u64,
+) -> Result<String, String> {
+    let vault_address = *VAULT_PDA;
+    let cp_swap_program = CP_SWAP_PROGRAM;
+    let pool_address = POOL_ADDRESS;
+
+    let vault_pool_address = get_vault_pool_pda(&pool_address);
+
+     // TODO: pass in pool state
+     let pool_state = get_pool_state(raydium_program, pool_address)
+        .await
+        .map_err(|e| format!("Failed to get pool state: {}", e))?;
+    
+    let vault_a = pool_state.token_0_vault;
+    let vault_b = pool_state.token_1_vault;
+    let mint_a = pool_state.token_0_mint;
+    let mint_b = pool_state.token_1_mint;
+
+    // Get authority PDA for the swap program
+    let authority = *SWAP_AUTHORITY_PDA;
+
+    let lp_mint = pool_state.lp_mint;
+    
+    let owner_lp_token = anchor_spl::associated_token::get_associated_token_address(&vault_address, &lp_mint);
+    let owner_token_0 = anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_a);
+    let owner_token_1 = anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_b);
+
+    let accounts = memepool::client::accounts::LpDeposit {
+        aggregator: aggregator_keypair.pubkey(),
+        vault: vault_address,
+        vault_pool: vault_pool_address,
+        cp_swap_program,
+        authority,
+        pool_state: pool_address,
+        owner_lp_token, 
+        token_0_account: owner_token_0,
+        token_1_account: owner_token_1,
+        token_0_vault: vault_a,
+        token_1_vault: vault_b,
+        token_program: spl_token::ID,
+        token_program_2022: anchor_spl::token_2022::ID,
+        vault_0_mint: mint_a,
+        vault_1_mint: mint_b,
+        lp_mint,
+        system_program: system_program::ID,
+        associated_token_program: anchor_spl::associated_token::ID,
+    };
+
+    let args = memepool::client::args::LpDeposit { 
+        lp_token_amount, 
+        maximum_token_0_amount, 
+        maximum_token_1_amount 
+    };
+
+    let tx_builder = program
+        .request()
+        .args(args)
+        .accounts(accounts);
+
+    let tx = tx_builder
+        .send()
+        .await
+        .map_err(|e| format!("Failed to send lp deposit transaction: {}", e))?;
+
 
     Ok(tx.to_string())
 }

@@ -28,7 +28,13 @@ pub static SWAP_AUTHORITY_PDA: Lazy<Pubkey> = Lazy::new(|| {
 
 
 pub fn get_oracle_pda(pool: &Pubkey) -> Pubkey {
-    let seeds: [&[u8]; 2] = [b"observation".as_ref(), pool.as_ref()];
+    let seeds: [&[u8]; 2] = [b"observation", pool.as_ref()];
     let (pda, _) = Pubkey::find_program_address(&seeds, &CP_SWAP_PROGRAM);
+    pda
+}
+
+pub fn get_vault_pool_pda(pool: &Pubkey) -> Pubkey {
+    let seeds: [&[u8]; 2] = [b"vault_pool", pool.as_ref()];
+    let (pda, _) = Pubkey::find_program_address(&seeds, &memepool::ID);
     pda
 }

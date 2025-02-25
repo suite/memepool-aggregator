@@ -668,11 +668,11 @@
           "type": "u64"
         },
         {
-          "name": "maximum_token_0_amount",
+          "name": "minimum_token_0_amount",
           "type": "u64"
         },
         {
-          "name": "maximum_token_1_amount",
+          "name": "minimum_token_1_amount",
           "type": "u64"
         }
       ]

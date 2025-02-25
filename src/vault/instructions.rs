@@ -9,7 +9,7 @@ use std::rc::Rc;
 use crate::{memepool, raydium::get_pool_state};
 use super::utils::{get_oracle_pda, CP_SWAP_PROGRAM, MEME_MINT_PDA, POOL_ADDRESS, SWAP_AUTHORITY_PDA, VAULT_PDA, WSOL_MINT};
 
-pub async fn fill_withdraw_request(
+pub async fn vault_fill_withdraw(
     program: &Program<Rc<Keypair>>,
     aggregator_keypair: &Keypair,
     request_pubkey: Pubkey,

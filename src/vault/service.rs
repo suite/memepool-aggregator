@@ -9,7 +9,7 @@ use std::rc::Rc;
 use crate::{memepool, raydium::get_pool_state};
 use super::{
     utils::{VAULT_PDA, MEME_MINT_PDA, POOL_ADDRESS},
-    instructions::fill_withdraw_request,
+    instructions::vault_fill_withdraw,
 };
 
 pub async fn process_withdraw_request(
@@ -40,7 +40,7 @@ pub async fn process_withdraw_request(
         println!("Processing withdraw request {} with {} SOL", request_pubkey, required_sol);
         
         // Call fill_withdraw_request with the calculated amount
-        let tx = fill_withdraw_request(
+        let tx = vault_fill_withdraw(
             program,
             aggregator_keypair,
             request_pubkey,

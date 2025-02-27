@@ -261,10 +261,31 @@ pub async fn lp_withdraw(
         .args(args)
         .accounts(accounts);
 
-    let tx = tx_builder
+    // let tx = tx_builder
+    //     .send()
+    //     .await
+    //     .map_err(|e| format!("Failed to send lp deposit transaction: {}", e))?;
+    let tx = match tx_builder
         .send()
-        .await
-        .map_err(|e| format!("Failed to send lp deposit transaction: {}", e))?;
+        .await 
+    {
+        Ok(sig) => Ok(sig.to_string()),
+        Err(e) => {
+            println!("\nTransaction failed with error:");
+            // println!("{:#?}", e);
+            
+            // TODO: TEMP TO GET PROGRAM LOGS
+            if let anchor_client::ClientError::ProgramError(program_err) = &e {
+                println!("\nProgram error details:");
+                println!("Error code: {}", program_err.to_string());
+            } else if let anchor_client::ClientError::SolanaClientError(rpc_err) = &e {
+                println!("\nRPC error details:");
+                println!("{:#?}", rpc_err);
+            }
+            
+            Err(format!("Failed to send swap transaction: {}", e))
+        }
+    }?;
 
 
     Ok(tx.to_string())

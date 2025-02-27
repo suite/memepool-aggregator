@@ -54,6 +54,14 @@ pub async fn process_lp_swap(
         return Err("Minimum output amount cannot be zero".to_string());
     }
 
+    println!(
+        "Swapping {} {} for minimum {} {}",
+        swap_amount,
+        if base_token { "WSOL" } else { "tokens" },
+        minimum_amount_out,
+        if base_token { "tokens" } else { "WSOL" }
+    );
+
     // Execute the swap
     let swap_tx = super::instructions::lp_swap(
         program,
@@ -116,6 +124,8 @@ pub async fn process_lp_deposit(
         pool_amount1
     )?;
 
+    // TODO: add slippage?
+
     // Make sure lp_token_amount != 0
     if lp_token_amount == 0 {
         return Err("LP token amount cannot be zero".to_string());
@@ -152,15 +162,15 @@ pub async fn process_lp_withdraw(
     let (pool_amount0, pool_amount1) = pool_state.get_vault_amounts(spl_program)
         .await
         .map_err(|e| format!("Failed to get vault amounts: {}", e))?;
+
+    println!("Current pool amounts - WSOL: {}, Token1: {}", pool_amount0, pool_amount1);
     
     let lp_supply = pool_state.lp_supply;
     
-    // Split the withdraw amount into what we'll get directly as WSOL and what we'll get by swapping
-    let wsol_direct = withdraw_amount.checked_div(2)
+    let wsol_from_swap = withdraw_amount.checked_div(2)
         .ok_or("Failed to calculate direct WSOL amount")?;
 
-    // Make sure we don't lose any tokens with odd numbers
-    let wsol_from_swap = withdraw_amount.checked_sub(wsol_direct)
+    let wsol_left_over = withdraw_amount.checked_sub(wsol_from_swap)
         .ok_or("Failed to calculate swap WSOL amount: subtraction error")?;
 
     // Calculate how much of token1 we need (equivalent to wsol_from_swap in value)
@@ -173,44 +183,30 @@ pub async fn process_lp_withdraw(
     
     // Use the utility function to calculate LP tokens to withdraw
     let lp_token_amount = calculate_lp_amount(
-        wsol_from_swap,
+        wsol_left_over,
         token1_needed,
         lp_supply,
         pool_amount0,
         pool_amount1
     )?;
     
+    // TODO: move chck into calculate_lp_amount
     if lp_token_amount == 0 {
         return Err("Calculated LP token amount is too small".to_string());
     }
-    
-    // Calculate the minimum amounts we expect to receive with a slippage tolerance
-    let slippage = 95; // 95% (5% slippage allowance)
-    
-    // Calculate expected amounts based on LP tokens being withdrawn
-    let expected_token0 = (lp_token_amount as u128)
-        .checked_mul(pool_amount0 as u128)
-        .and_then(|product| product.checked_div(lp_supply as u128))
-        .ok_or("Failed to calculate expected token0 amount")?;
-    
-    let expected_token1 = (lp_token_amount as u128)
-        .checked_mul(pool_amount1 as u128)
-        .and_then(|product| product.checked_div(lp_supply as u128))
-        .ok_or("Failed to calculate expected token1 amount")?;
-    
-    // Apply slippage tolerance
-    let minimum_token_0_amount = expected_token0
-        .checked_mul(slippage as u128)
-        .and_then(|with_slippage| with_slippage.checked_div(100))
-        .and_then(|final_result| u64::try_from(final_result).ok())
-        .ok_or("Failed to apply slippage to token0 amount")?;
-    
-    let minimum_token_1_amount = expected_token1
-        .checked_mul(slippage as u128)
-        .and_then(|with_slippage| with_slippage.checked_div(100))
-        .and_then(|final_result| u64::try_from(final_result).ok())
-        .ok_or("Failed to apply slippage to token1 amount")?;
-    
+
+    // Calculate minimum amounts with slippage tolerance
+    let slippage = 90; //
+    let minimum_token_0_amount = wsol_left_over
+        .checked_mul(slippage)
+        .and_then(|product| product.checked_div(100))
+        .ok_or("Failed to calculate minimum token 0 amount")?;
+
+    let minimum_token_1_amount = token1_needed
+        .checked_mul(slippage)
+        .and_then(|product| product.checked_div(100))
+        .ok_or("Failed to calculate minimum token 1 amount")?;
+
     println!("Withdrawing {} LP tokens for at least {} token0 and {} token1", 
         lp_token_amount, minimum_token_0_amount, minimum_token_1_amount);
     
@@ -226,7 +222,7 @@ pub async fn process_lp_withdraw(
     
     println!("Withdrew successfully. Tx: {}", withdraw_tx);
     
-    // Now swap token1 into WSOL if needed
+    // Sswap token1 into WSOL if needed
     let slippage = 95; // 95% slippage tolerance
     let swap_tx = process_lp_swap(
         program,
@@ -240,7 +236,7 @@ pub async fn process_lp_withdraw(
     .await
     .map_err(|e| format!("Failed to swap token1 to WSOL: {}", e))?;
     
-    println!("Swapped {} token1 for WSOL", minimum_token_1_amount);
+    println!("Swapped {} token1 for WSOL", token1_needed);
     println!("Swap tx: {}", swap_tx.0);
     
     // Return the withdrawal transaction signature

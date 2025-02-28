@@ -28,6 +28,12 @@ pub async fn process_lp_swap(
     let pool_amounts = pool_state.get_vault_amounts(spl_program)
         .await
         .map_err(|e| format!("Failed to get pool amounts: {}", e))?;
+
+    println!(
+        "Pool amounts - WSOL: {}, Other token: {}",
+        pool_amounts.0,
+        pool_amounts.1
+    );
     
     // Calculate expected output based on the current pool ratio and direction
     let amount_out = if base_token {
@@ -49,6 +55,13 @@ pub async fn process_lp_swap(
         .and_then(|with_slippage| with_slippage.checked_div(100))
         .and_then(|final_result| u64::try_from(final_result).ok())
         .ok_or("Failed to apply slippage: overflow or conversion error")?;
+
+    println!(
+        "Swapping {} token0 for {} token1 (expected: {})",
+        swap_amount,
+        minimum_amount_out,
+        amount_out
+    );
 
     if minimum_amount_out == 0 {
         return Err("Minimum output amount cannot be zero".to_string());
@@ -179,12 +192,17 @@ pub async fn process_lp_withdraw(
         .and_then(|result| u64::try_from(result).ok())
         .ok_or("Failed to calculate Token1 amount to swap")?;
 
-    let lp_fraction = (wsol_direct as u128)
-        .checked_div(pool_amount0 as u128)
-        .ok_or("Failed to calculate LP fraction: division by zero")?;
+    // let lp_fraction = (wsol_direct as u128)
+    //     .checked_div(pool_amount0 as u128)
+    //     .ok_or("Failed to calculate LP fraction: division by zero")?;
     
+    // let lp_token_amount = (lp_supply as u128)
+    //     .checked_mul(lp_fraction)
+    //     .and_then(|result| u64::try_from(result).ok())
+    //     .ok_or("Failed to calculate LP token amount")?;
     let lp_token_amount = (lp_supply as u128)
-        .checked_mul(lp_fraction)
+        .checked_mul(wsol_direct as u128)
+        .and_then(|product| product.checked_div(pool_amount0 as u128))
         .and_then(|result| u64::try_from(result).ok())
         .ok_or("Failed to calculate LP token amount")?;
 

@@ -138,6 +138,8 @@ pub async fn lp_deposit(
 
     let vault_pool_address = get_vault_pool_pda(&pool_address);
 
+    println!("Using vault pool address: {}", vault_pool_address);
+
      // TODO: pass in pool state
      let pool_state = get_pool_state(raydium_program, pool_address)
         .await
@@ -210,6 +212,8 @@ pub async fn lp_withdraw(
     let cp_swap_program = CP_SWAP_PROGRAM;
     let pool_address = POOL_ADDRESS;
     let vault_pool_address = get_vault_pool_pda(&pool_address);
+
+    println!("Using vault pool address: {}", vault_pool_address);
 
      // TODO: pass in pool state
      let pool_state = get_pool_state(raydium_program, pool_address)

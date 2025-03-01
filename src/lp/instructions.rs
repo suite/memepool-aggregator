@@ -131,6 +131,7 @@ pub async fn lp_deposit(
     lp_token_amount: u64,
     maximum_token_0_amount: u64,
     maximum_token_1_amount: u64,
+    deposit_value: u64,
 ) -> Result<String, String> {
     let vault_address = *VAULT_PDA;
     let cp_swap_program = CP_SWAP_PROGRAM;
@@ -183,7 +184,8 @@ pub async fn lp_deposit(
     let args = memepool::client::args::LpDeposit { 
         lp_token_amount, 
         maximum_token_0_amount, 
-        maximum_token_1_amount 
+        maximum_token_1_amount,
+        deposit_value,
     };
 
     let tx_builder = program
@@ -207,6 +209,7 @@ pub async fn lp_withdraw(
     lp_token_amount: u64,
     minimum_token_0_amount: u64,
     minimum_token_1_amount: u64,
+    withdraw_value: u64,
 ) -> Result<String, String> {
     let vault_address = *VAULT_PDA;
     let cp_swap_program = CP_SWAP_PROGRAM;
@@ -258,6 +261,7 @@ pub async fn lp_withdraw(
         lp_token_amount,
         minimum_token_0_amount,
         minimum_token_1_amount,
+        withdraw_value,
     };
 
     let tx_builder = program

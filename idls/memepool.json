@@ -1,5 +1,5 @@
 {
-  "address": "F2f16ivA9a7BwLA6hmLcny2fD15XDToBnpxERVNdtwSy",
+  "address": "2FFxe3uuZcEoKEdtotrANZmYQZxiaqAoZC6afxYFTWoz",
   "metadata": {
     "name": "memepool",
     "version": "0.1.0",
@@ -296,6 +296,10 @@
         },
         {
           "name": "maximum_token_1_amount",
+          "type": "u64"
+        },
+        {
+          "name": "deposit_value",
           "type": "u64"
         }
       ]
@@ -673,6 +677,10 @@
         },
         {
           "name": "minimum_token_1_amount",
+          "type": "u64"
+        },
+        {
+          "name": "withdraw_value",
           "type": "u64"
         }
       ]
@@ -2394,6 +2402,10 @@
           },
           {
             "name": "lamports",
+            "type": "u64"
+          },
+          {
+            "name": "available_lamports",
             "type": "u64"
           }
         ]

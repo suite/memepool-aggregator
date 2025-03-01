@@ -7,13 +7,12 @@ use anchor_spl::token::Mint;
 use std::rc::Rc;
 
 use crate::{
-    memepool,
-    utils::{MEME_MINT_PDA, VAULT_PDA},
-    vault::instructions::vault_fill_withdraw,
+    lp, memepool, utils::{MEME_MINT_PDA, POOL_ADDRESS, VAULT_PDA}, vault::instructions::vault_fill_withdraw
 };
 
 pub async fn process_withdraw_request(
     program: &Program<Rc<Keypair>>,
+    raydium_program: &Program<Rc<Keypair>>,
     spl_program: &Program<Rc<Keypair>>,
     aggregator_keypair: &Keypair,
     request_pubkey: Pubkey,
@@ -36,7 +35,7 @@ pub async fn process_withdraw_request(
         .and_then(|product| product.checked_div(meme_token_supply))
         .ok_or("Failed to calculate required SOL: overflow or division by zero")?;
 
-    if required_sol <= vault.lamports {
+    if required_sol <= vault.available_lamports {
         println!("Processing withdraw request {} with {} SOL", request_pubkey, required_sol);
         
         // Call fill_withdraw_request with the calculated amount
@@ -51,15 +50,24 @@ pub async fn process_withdraw_request(
         println!("Fill withdraw request transaction: {}", tx);
         Ok(())
     } else {
-        Err(format!(
-            "Insufficient SOL in vault. Need {} SOL but vault only has {} SOL",
-            required_sol, vault.lamports
-        ))
+        // process_lp_withdraw
+        println!("Initiating LP withdraw of {} tokens...", required_sol-vault.available_lamports);
+        lp::process_lp_withdraw(
+            &program,
+            &raydium_program,
+            &spl_program,
+            &aggregator_keypair,
+            POOL_ADDRESS,
+            required_sol-vault.available_lamports,
+        ).await?;
+
+        Ok(())
     }
 }
 
 pub async fn process_withdraw_requests_batch(
     program: &Program<Rc<Keypair>>,
+    raydium_program: &Program<Rc<Keypair>>,
     spl_program: &Program<Rc<Keypair>>,
     aggregator_keypair: &Keypair,
     withdraw_requests: Vec<(Pubkey, memepool::accounts::WithdrawRequest)>
@@ -71,6 +79,7 @@ pub async fn process_withdraw_requests_batch(
         
         let result = process_withdraw_request(
             program,
+            raydium_program,
             spl_program,
             aggregator_keypair,
             request_pubkey,

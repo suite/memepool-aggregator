@@ -142,7 +142,8 @@ pub async fn process_lp_deposit(
         aggregator_keypair,
         lp_token_amount,
         wsol_leftover,
-        minimum_amount_out
+        minimum_amount_out,
+        deposit_amount, // TODO: major discrepancy, calculate actual number (update available_sol with sol not used)
     ).await?;
 
     println!("Deposited {} WSOL and {} tokens for {} LP tokens", wsol_leftover, minimum_amount_out, lp_token_amount);
@@ -173,12 +174,15 @@ pub async fn process_lp_withdraw(
     println!("lp mint: {}", pool_state.lp_mint);
     println!("Current pool amounts - WSOL: {}, Token1: {}, lp supply: {}", pool_amount0, pool_amount1, lp_supply);
     
-
-    let lp_to_burn = (withdraw_amount as u128)
+    let numerator = (withdraw_amount as u128)
         .checked_mul(lp_supply as u128)
-        .and_then(|product| product.checked_div(pool_amount0 as u128))
-        .and_then(|result| u64::try_from(result).ok())
-        .ok_or("Failed to calculate LP tokens to burn: overflow, division by zero, or conversion error")?;
+        .ok_or("Overflow in numerator")?;
+    let denominator = (2 as u128)
+        .checked_mul(pool_amount0 as u128)
+        .ok_or("Overflow in denominator")?;
+    let lp_to_burn_u128 = (numerator + denominator - 1) / denominator; // Ceiling division
+    let lp_to_burn = u64::try_from(lp_to_burn_u128)
+        .map_err(|_| "LP to burn exceeds u64 range")?;
 
     // TODO: Check to make sure we have enough LP tokens
 
@@ -219,6 +223,7 @@ pub async fn process_lp_withdraw(
         lp_to_burn,
         minimum_wsol_received,
         minimum_token1_received,
+        withdraw_amount,
     )
     .await
     .map_err(|e| format!("Failed to execute LP withdrawal: {}", e))?;

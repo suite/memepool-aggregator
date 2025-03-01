@@ -3,11 +3,12 @@ mod vault;
 mod raydium;
 mod lp;
 mod utils;
+mod debug;
 
+use std::env;
 use tokio::time::{interval, Duration};
 use anchor_lang::prelude::declare_program;
-use utils::POOL_ADDRESS;
-
+use utils::{POOL_ADDRESS, VAULT_PDA};
 /*
 
 TODO:
@@ -23,81 +24,25 @@ async fn main() {
     let aggregator_keypair = client::load_aggregator_keypair();
     let (program, spl_program, raydium_program) = client::get_programs(&aggregator_keypair);
     
-    println!("Enter operation (d for deposit, w for withdraw, q to quit):");
-    let mut input = String::new();
+    // Check for command line arguments
+    let args: Vec<String> = env::args().collect();
+    let debug_mode = args.len() > 1 && args[1] == "--debug";
     
-    loop {
-        input.clear();
-        if std::io::stdin().read_line(&mut input).is_err() {
-            println!("Failed to read input");
-            continue;
-        }
-
-        let trimmed = input.trim();
-        if trimmed == "q" {
-            break;
-        }
-
-        match trimmed {
-            "d" => {
-                println!("Enter LP deposit amount:");
-                let mut amount_input = String::new();
-                if std::io::stdin().read_line(&mut amount_input).is_err() {
-                    println!("Failed to read amount");
-                    continue;
-                }
-
-                match amount_input.trim().parse::<u64>() {
-                    Ok(amount) => {
-                        println!("Initiating LP deposit of {} tokens...", amount);
-                        match lp::process_lp_deposit(
-                            &program,
-                            &raydium_program,
-                            &spl_program,
-                            &aggregator_keypair,
-                            POOL_ADDRESS,
-                            amount,
-                        ).await {
-                            Ok(_) => println!("Deposit successful"),
-                            Err(e) => println!("Deposit failed: {}", e)
-                        }
-                    },
-                    Err(_) => println!("Please enter a valid number")
-                }
-            },
-            "w" => {
-                println!("Enter LP withdraw amount:");
-                let mut amount_input = String::new();
-                if std::io::stdin().read_line(&mut amount_input).is_err() {
-                    println!("Failed to read amount");
-                    continue;
-                }
-
-                match amount_input.trim().parse::<u64>() {
-                    Ok(amount) => {
-                        println!("Initiating LP withdraw of {} tokens...", amount);
-                        match lp::process_lp_withdraw(
-                            &program,
-                            &raydium_program,
-                            &spl_program,
-                            &aggregator_keypair,
-                            POOL_ADDRESS,
-                            amount,
-                        ).await {
-                            Ok(_) => println!("Withdraw successful"),
-                            Err(e) => println!("Withdraw failed: {}", e)
-                        }
-                    },
-                    Err(_) => println!("Please enter a valid number")
-                }
-            },
-            _ => println!("Invalid operation. Use 'd' for deposit, 'w' for withdraw, or 'q' to quit")
-        }
-
-        println!("\nEnter operation (d for deposit, w for withdraw, q to quit):");
+    if debug_mode {
+        // Run interactive debug loop
+        debug::run_interactive_test_loop(
+            &program,
+            &raydium_program,
+            &spl_program,
+            &aggregator_keypair
+        ).await;
+        return;
     }
+
+    // TODO: If no withdraw requests, and we have sol, deposit into lp
+    // need to keep track of available_lamports
  
-    let mut interval = interval(Duration::from_secs(5));
+    let mut interval = interval(Duration::from_secs(15));
     loop {
         interval.tick().await;    
         
@@ -112,6 +57,7 @@ async fn main() {
             println!("Processing {} withdraw requests...", withdraw_requests.len());
             let results = vault::process_withdraw_requests_batch(
                 &program,
+                &raydium_program,
                 &spl_program,
                 &aggregator_keypair,
                 withdraw_requests
@@ -128,7 +74,26 @@ async fn main() {
                 failures.len()
             );
         } else {
-            println!("No pending withdraw requests found, sleeping");
+            let vault = program.account::<memepool::accounts::Vault>(*VAULT_PDA)
+                .await.unwrap();
+
+            if vault.available_lamports >= 1000 {
+                println!("No pending withdraw requests found, but we have avail SOL, depositing into LP");
+
+                match lp::process_lp_deposit(
+                    &program,
+                    &raydium_program,
+                    &spl_program,
+                    &aggregator_keypair,
+                    POOL_ADDRESS,
+                    1000,
+                ).await {
+                    Ok(_) => println!("Deposit successful"),
+                    Err(e) => println!("Deposit failed: {}", e)
+                };
+            } else {
+                println!("No pending withdraw requests found and no avail SOL, sleeping")
+            }
         }
     }
 }

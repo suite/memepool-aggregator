@@ -1,6 +1,6 @@
 use anchor_client::{
-    solana_sdk::{signature::Keypair, system_program, signer::Signer},
-    Program
+    solana_sdk::{signature::Keypair, signer::Signer, system_program},
+    Program,
 };
 
 use anchor_spl::token::spl_token;
@@ -10,13 +10,8 @@ use crate::{
     memepool,
     raydium::get_pool_state,
     utils::{
-        CP_SWAP_PROGRAM,
-        MEMO_PROGRAM,
-        POOL_ADDRESS,
-        SWAP_AUTHORITY_PDA,
-        VAULT_PDA,
-        get_oracle_pda,
-        get_vault_pool_pda,
+        get_oracle_pda, get_vault_pool_pda, CP_SWAP_PROGRAM, MEMO_PROGRAM, POOL_ADDRESS,
+        SWAP_AUTHORITY_PDA, VAULT_PDA,
     },
 };
 
@@ -45,10 +40,16 @@ pub async fn lp_swap(
 
     // Get authority PDA for the swap program
     let authority = *SWAP_AUTHORITY_PDA;
-    
+
     // Determine input and output based on swap direction
-    let (input_token_account, output_token_account, input_vault, output_vault, input_token_mint, output_token_mint) = 
-    if is_base_token {
+    let (
+        input_token_account,
+        output_token_account,
+        input_vault,
+        output_vault,
+        input_token_mint,
+        output_token_mint,
+    ) = if is_base_token {
         (
             anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_a),
             anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_b),
@@ -64,7 +65,7 @@ pub async fn lp_swap(
             vault_b,
             vault_a,
             mint_b,
-            mint_a
+            mint_a,
         )
     };
 
@@ -93,21 +94,15 @@ pub async fn lp_swap(
         amount_in,
         minimum_amount_out,
     };
-    
-    let tx_builder = program
-        .request()
-        .args(args)
-        .accounts(accounts);
 
-    let tx = match tx_builder
-        .send()
-        .await 
-    {
+    let tx_builder = program.request().args(args).accounts(accounts);
+
+    let tx = match tx_builder.send().await {
         Ok(sig) => Ok(sig.to_string()),
         Err(e) => {
             println!("\nTransaction failed with error:");
             // println!("{:#?}", e);
-            
+
             // TODO: TEMP TO GET PROGRAM LOGS
             if let anchor_client::ClientError::ProgramError(program_err) = &e {
                 println!("\nProgram error details:");
@@ -116,7 +111,7 @@ pub async fn lp_swap(
                 println!("\nRPC error details:");
                 println!("{:#?}", rpc_err);
             }
-            
+
             Err(format!("Failed to send swap transaction: {}", e))
         }
     }?;
@@ -131,7 +126,6 @@ pub async fn lp_deposit(
     lp_token_amount: u64,
     maximum_token_0_amount: u64,
     maximum_token_1_amount: u64,
-    deposit_value: u64,
 ) -> Result<String, String> {
     let vault_address = *VAULT_PDA;
     let cp_swap_program = CP_SWAP_PROGRAM;
@@ -141,11 +135,11 @@ pub async fn lp_deposit(
 
     println!("Using vault pool address: {}", vault_pool_address);
 
-     // TODO: pass in pool state
-     let pool_state = get_pool_state(raydium_program, pool_address)
+    // TODO: pass in pool state
+    let pool_state = get_pool_state(raydium_program, pool_address)
         .await
         .map_err(|e| format!("Failed to get pool state: {}", e))?;
-    
+
     let vault_a = pool_state.token_0_vault;
     let vault_b = pool_state.token_1_vault;
     let mint_a = pool_state.token_0_mint;
@@ -155,10 +149,13 @@ pub async fn lp_deposit(
     let authority = *SWAP_AUTHORITY_PDA;
 
     let lp_mint = pool_state.lp_mint;
-    
-    let owner_lp_token = anchor_spl::associated_token::get_associated_token_address(&vault_address, &lp_mint);
-    let owner_token_0 = anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_a);
-    let owner_token_1 = anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_b);
+
+    let owner_lp_token =
+        anchor_spl::associated_token::get_associated_token_address(&vault_address, &lp_mint);
+    let owner_token_0 =
+        anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_a);
+    let owner_token_1 =
+        anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_b);
 
     let accounts = memepool::client::accounts::LpDeposit {
         aggregator: aggregator_keypair.pubkey(),
@@ -167,7 +164,7 @@ pub async fn lp_deposit(
         cp_swap_program,
         authority,
         pool_state: pool_address,
-        owner_lp_token, 
+        owner_lp_token,
         token_0_account: owner_token_0,
         token_1_account: owner_token_1,
         token_0_vault: vault_a,
@@ -181,23 +178,18 @@ pub async fn lp_deposit(
         associated_token_program: anchor_spl::associated_token::ID,
     };
 
-    let args = memepool::client::args::LpDeposit { 
-        lp_token_amount, 
-        maximum_token_0_amount, 
+    let args = memepool::client::args::LpDeposit {
+        lp_token_amount,
+        maximum_token_0_amount,
         maximum_token_1_amount,
-        deposit_value,
     };
 
-    let tx_builder = program
-        .request()
-        .args(args)
-        .accounts(accounts);
+    let tx_builder = program.request().args(args).accounts(accounts);
 
     let tx = tx_builder
         .send()
         .await
         .map_err(|e| format!("Failed to send lp deposit transaction: {}", e))?;
-
 
     Ok(tx.to_string())
 }
@@ -209,7 +201,6 @@ pub async fn lp_withdraw(
     lp_token_amount: u64,
     minimum_token_0_amount: u64,
     minimum_token_1_amount: u64,
-    withdraw_value: u64,
 ) -> Result<String, String> {
     let vault_address = *VAULT_PDA;
     let cp_swap_program = CP_SWAP_PROGRAM;
@@ -218,11 +209,11 @@ pub async fn lp_withdraw(
 
     println!("Using vault pool address: {}", vault_pool_address);
 
-     // TODO: pass in pool state
-     let pool_state = get_pool_state(raydium_program, pool_address)
+    // TODO: pass in pool state
+    let pool_state = get_pool_state(raydium_program, pool_address)
         .await
         .map_err(|e| format!("Failed to get pool state: {}", e))?;
-    
+
     let vault_a = pool_state.token_0_vault;
     let vault_b = pool_state.token_1_vault;
     let mint_a = pool_state.token_0_mint;
@@ -232,10 +223,13 @@ pub async fn lp_withdraw(
     let authority = *SWAP_AUTHORITY_PDA;
 
     let lp_mint = pool_state.lp_mint;
-    
-    let owner_lp_token = anchor_spl::associated_token::get_associated_token_address(&vault_address, &lp_mint);
-    let owner_token_0 = anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_a);
-    let owner_token_1 = anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_b);
+
+    let owner_lp_token =
+        anchor_spl::associated_token::get_associated_token_address(&vault_address, &lp_mint);
+    let owner_token_0 =
+        anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_a);
+    let owner_token_1 =
+        anchor_spl::associated_token::get_associated_token_address(&vault_address, &mint_b);
 
     let accounts = memepool::client::accounts::LpWithdraw {
         aggregator: aggregator_keypair.pubkey(),
@@ -244,7 +238,7 @@ pub async fn lp_withdraw(
         cp_swap_program,
         authority,
         pool_state: pool_address,
-        owner_lp_token, 
+        owner_lp_token,
         token_0_account: owner_token_0,
         token_1_account: owner_token_1,
         token_0_vault: vault_a,
@@ -261,27 +255,20 @@ pub async fn lp_withdraw(
         lp_token_amount,
         minimum_token_0_amount,
         minimum_token_1_amount,
-        withdraw_value,
     };
 
-    let tx_builder = program
-        .request()
-        .args(args)
-        .accounts(accounts);
+    let tx_builder = program.request().args(args).accounts(accounts);
 
     // let tx = tx_builder
     //     .send()
     //     .await
     //     .map_err(|e| format!("Failed to send lp deposit transaction: {}", e))?;
-    let tx = match tx_builder
-        .send()
-        .await 
-    {
+    let tx = match tx_builder.send().await {
         Ok(sig) => Ok(sig.to_string()),
         Err(e) => {
             println!("\nTransaction failed with error:");
             // println!("{:#?}", e);
-            
+
             // TODO: TEMP TO GET PROGRAM LOGS
             if let anchor_client::ClientError::ProgramError(program_err) = &e {
                 println!("\nProgram error details:");
@@ -290,11 +277,10 @@ pub async fn lp_withdraw(
                 println!("\nRPC error details:");
                 println!("{:#?}", rpc_err);
             }
-            
+
             Err(format!("Failed to send swap transaction: {}", e))
         }
     }?;
-
 
     Ok(tx.to_string())
 }
